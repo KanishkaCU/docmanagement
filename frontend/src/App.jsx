@@ -12,13 +12,11 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // AI Assistant
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [sources, setSources] = useState([]);
   const [chatLoading, setChatLoading] = useState(false);
 
-  // Fetch documents
   const fetchDocuments = async () => {
     try {
       const response = await axios.get(API_URL);
@@ -29,15 +27,13 @@ function App() {
     }
   };
 
-  // Load documents when page opens
   useEffect(() => {
     fetchDocuments();
   }, []);
 
-  // Upload document
   const handleUpload = async () => {
     if (!file) {
-      setMessage("Please select a file");
+      setMessage("Please select a file first.");
       return;
     }
 
@@ -50,16 +46,13 @@ function App() {
 
       await axios.post(`${API_URL}/upload`, formData);
 
-      setMessage("Document uploaded successfully");
-
+      setMessage("Document uploaded successfully.");
       setFile(null);
 
       document.getElementById("fileInput").value = "";
 
       await fetchDocuments();
     } catch (error) {
-      console.error(error);
-
       setMessage(
         error.response?.data?.message || "Upload failed"
       );
@@ -68,24 +61,19 @@ function App() {
     }
   };
 
-  // Delete document
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${API_URL}/${id}`);
 
-      setMessage("Document deleted successfully");
-
+      setMessage("Document deleted successfully.");
       await fetchDocuments();
     } catch (error) {
-      console.error(error);
-
       setMessage(
         error.response?.data?.message || "Delete failed"
       );
     }
   };
 
-  // Download document
   const handleDownload = (id) => {
     window.open(
       `${API_URL}/${id}/download`,
@@ -93,17 +81,15 @@ function App() {
     );
   };
 
-  // Ask AI
   const handleAskQuestion = async () => {
     if (!question.trim()) {
-      setMessage("Please enter a question");
+      setMessage("Please enter a question.");
       return;
     }
 
     try {
       setChatLoading(true);
       setMessage("");
-
       setAnswer("");
       setSources([]);
 
@@ -117,8 +103,6 @@ function App() {
       setAnswer(response.data.answer);
       setSources(response.data.sources || []);
     } catch (error) {
-      console.error(error);
-
       setMessage(
         error.response?.data?.message ||
           "Failed to process question"
@@ -128,244 +112,304 @@ function App() {
     }
   };
 
-  // Clear AI answer
-  const handleClearAnswer = () => {
-    setQuestion("");
-    setAnswer("");
-    setSources([]);
-  };
-
   return (
     <div className="app">
 
-      {/* Header */}
-      <header>
-        <div className="header-content">
-          <h1>Document Management & AI Assistant</h1>
+      {/* Sidebar */}
+      <aside className="sidebar">
 
-          <p>
-            Manage your documents and ask questions using AI
-          </p>
-        </div>
-      </header>
+        <div className="brand">
+          <div className="brand-icon">D</div>
 
-      <main>
-
-        {/* Upload Section */}
-        <section className="upload-section">
-
-          <h2>Upload Document</h2>
-
-          <p className="upload-description">
-            Upload TXT, Markdown or JSON documents.
-          </p>
-
-          <div className="upload-box">
-
-            <input
-              id="fileInput"
-              type="file"
-              accept=".txt,.md,.json"
-              onChange={(e) => {
-                setFile(e.target.files[0]);
-                setMessage("");
-              }}
-            />
-
-            <button
-              onClick={handleUpload}
-              disabled={loading}
-            >
-              {loading ? "Uploading..." : "Upload"}
-            </button>
-
+          <div>
+            <h1>DocuMind</h1>
+            <span>AI Document Workspace</span>
           </div>
+        </div>
+
+        <div className="sidebar-section">
+
+          <div className="section-title">
+            <span>MY DOCUMENTS</span>
+
+            <span className="count">
+              {documents.length}
+            </span>
+          </div>
+
+          <label
+            htmlFor="fileInput"
+            className="upload-button"
+          >
+            + Add document
+          </label>
+
+          <input
+            id="fileInput"
+            type="file"
+            accept=".txt,.md,.json"
+            onChange={(e) => {
+              setFile(e.target.files[0]);
+              setMessage("");
+            }}
+            hidden
+          />
 
           {file && (
-            <p className="upload-description">
-              Selected: <strong>{file.name}</strong>
-            </p>
+            <div className="selected-file">
+              <span>{file.name}</span>
+
+              <button onClick={handleUpload}>
+                {loading ? "..." : "Upload"}
+              </button>
+            </div>
           )}
 
-          {message && (
-            <p className="message">
-              {message}
-            </p>
-          )}
+          <div className="sidebar-documents">
 
-        </section>
-
-        {/* Documents Section */}
-        <section className="documents-section">
-
-          <div className="documents-header">
-
-            <h2>Uploaded Documents</h2>
-
-            <span className="document-count">
-              {documents.length}{" "}
-              {documents.length === 1
-                ? "document"
-                : "documents"}
-            </span>
-
-          </div>
-
-          {documents.length === 0 ? (
-
-            <p>
-              No documents uploaded yet.
-            </p>
-
-          ) : (
-
-            <div className="document-list">
-
-              {documents.map((doc) => (
-
+            {documents.length === 0 ? (
+              <div className="empty-documents">
+                <div>📁</div>
+                <p>No documents yet</p>
+                <span>
+                  Upload a document to get started
+                </span>
+              </div>
+            ) : (
+              documents.map((doc) => (
                 <div
-                  className="document-card"
+                  className="sidebar-document"
                   key={doc._id}
                 >
 
-                  <div className="document-info">
-
-                    <div className="document-title">
-
-                      <div className="document-icon">
-                        📄
-                      </div>
-
-                      <h3>
-                        {doc.originalName}
-                      </h3>
-
-                    </div>
-
-                    <p>
-                      {doc.fileType} •{" "}
-                      {(doc.fileSize / 1024).toFixed(2)} KB
-                      {" • "}
-                      {new Date(
-                        doc.createdAt
-                      ).toLocaleString()}
-                    </p>
-
+                  <div className="file-icon">
+                    📄
                   </div>
 
-                  <div className="actions">
+                  <div className="file-details">
+                    <strong>
+                      {doc.originalName}
+                    </strong>
+
+                    <span>
+                      {doc.fileType} •{" "}
+                      {(doc.fileSize / 1024).toFixed(1)} KB
+                    </span>
+                  </div>
+
+                  <div className="file-actions">
 
                     <button
+                      title="Download"
                       onClick={() =>
                         handleDownload(doc._id)
                       }
                     >
-                      Download
+                      ↓
                     </button>
 
                     <button
-                      className="delete-button"
+                      title="Delete"
                       onClick={() =>
                         handleDelete(doc._id)
                       }
                     >
-                      Delete
+                      ×
                     </button>
 
                   </div>
 
                 </div>
+              ))
+            )}
 
-              ))}
+          </div>
 
-            </div>
+        </div>
 
-          )}
+        <div className="sidebar-footer">
+          <span className="status-dot"></span>
+          Local workspace
+        </div>
 
-        </section>
+      </aside>
 
-        {/* AI Assistant */}
-        <section className="ai-section">
+      {/* Main workspace */}
+      <main className="workspace">
 
-          <h2>🤖 AI Document Assistant</h2>
+        <div className="workspace-header">
 
-          <p className="ai-description">
-            Ask questions about the information contained
-            in your uploaded documents.
-          </p>
+          <div>
+            <span className="eyebrow">
+              DOCUMENT INTELLIGENCE
+            </span>
 
-          <div className="question-box">
+            <h2>
+              Ask anything about your documents.
+            </h2>
 
-            <input
-              type="text"
-              placeholder="e.g. How many days of annual leave are available?"
+            <p>
+              Search your uploaded files and get
+              answers with document sources.
+            </p>
+          </div>
+
+          <div className="header-badge">
+            ✦ AI Assistant
+          </div>
+
+        </div>
+
+        {/* Question area */}
+        <section className="question-area">
+
+          <div className="question-label">
+            <span>ASK A QUESTION</span>
+          </div>
+
+          <div className="question-input">
+
+            <textarea
               value={question}
+              placeholder="What would you like to know?"
+              rows="3"
               onChange={(e) => {
                 setQuestion(e.target.value);
                 setMessage("");
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !chatLoading) {
-                  handleAskQuestion();
+                if (
+                  e.key === "Enter" &&
+                  !e.shiftKey
+                ) {
+                  e.preventDefault();
+
+                  if (!chatLoading) {
+                    handleAskQuestion();
+                  }
                 }
               }}
             />
 
             <button
+              className="ask-button"
               onClick={handleAskQuestion}
               disabled={chatLoading}
             >
-              {chatLoading ? "Thinking..." : "Ask"}
+              {chatLoading ? "Thinking..." : "Ask AI →"}
             </button>
 
           </div>
 
-          {/* AI Answer */}
-          {answer && (
+          <span className="input-hint">
+            Press Enter to ask • Shift + Enter for a new line
+          </span>
 
-            <div className="answer-box">
+        </section>
 
-              <h3>Answer</h3>
+        {/* Message */}
+        {message && (
+          <div className="notification">
+            {message}
+          </div>
+        )}
 
-              <p>
-                {answer}
-              </p>
+        {/* Answer */}
+        {answer ? (
+          <section className="answer-area">
 
-              {/* Sources */}
-              {sources.length > 0 && (
+            <div className="answer-header">
 
-                <div className="sources">
+              <div className="answer-title">
+                <div className="ai-icon">✦</div>
 
-                  <h4>Sources</h4>
-
-                  {sources.map((source) => (
-
-                    <div
-                      className="source-item"
-                      key={source._id}
-                    >
-                      📄 {source.originalName}
-                    </div>
-
-                  ))}
-
+                <div>
+                  <span>AI RESPONSE</span>
+                  <h3>Here's what I found</h3>
                 </div>
-
-              )}
+              </div>
 
               <button
-                className="delete-button"
-                onClick={handleClearAnswer}
-                style={{ marginTop: "15px" }}
+                className="clear-button"
+                onClick={() => {
+                  setQuestion("");
+                  setAnswer("");
+                  setSources([]);
+                }}
               >
                 Clear
               </button>
 
             </div>
 
-          )}
+            <div className="answer-content">
+              {answer}
+            </div>
 
-        </section>
+            {sources.length > 0 && (
+              <div className="sources-area">
+
+                <div className="sources-heading">
+                  <span>Sources used</span>
+                  <span>
+                    {sources.length}
+                  </span>
+                </div>
+
+                <div className="sources-list">
+
+                  {sources.map((source) => (
+                    <div
+                      className="source-card"
+                      key={source._id}
+                    >
+                      <div className="source-icon">
+                        📄
+                      </div>
+
+                      <span>
+                        {source.originalName}
+                      </span>
+                    </div>
+                  ))}
+
+                </div>
+
+              </div>
+            )}
+
+          </section>
+        ) : (
+          <section className="welcome-area">
+
+            <div className="welcome-icon">
+              ✦
+            </div>
+
+            <h3>
+              Your documents, ready to explore.
+            </h3>
+
+            <p>
+              Upload a document from the left and ask
+              questions about its content here.
+            </p>
+
+            <div className="example-question">
+              <span>Try asking:</span>
+              <button
+                onClick={() =>
+                  setQuestion(
+                    "How many days of annual leave are employees entitled to?"
+                  )
+                }
+              >
+                "How many days of annual leave are employees entitled to?"
+              </button>
+            </div>
+
+          </section>
+        )}
 
       </main>
 
