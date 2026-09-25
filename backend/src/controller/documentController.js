@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const Document = require("../models/Document");
+const Document = require("../models/document");
 
 const extractText = (filePath) => {
   const extension = path.extname(filePath).toLowerCase();
@@ -31,7 +31,10 @@ const uploadDocument = async (req, res) => {
       extractedText,
     });
 
-    res.status(201).json(document);
+    res.status(201).json({
+      message: "Document uploaded successfully",
+      document,
+    });
   } catch (error) {
     res.status(500).json({
       message: "Failed to upload document",
@@ -40,6 +43,22 @@ const uploadDocument = async (req, res) => {
   }
 };
 
+const getDocuments = async (req, res) => {
+  try {
+    const documents = await Document.find()
+      .sort({ createdAt: -1 })
+      .select("-extractedText");
+
+    res.status(200).json(documents);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch documents",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   uploadDocument,
+  getDocuments,
 };
