@@ -1,0 +1,83 @@
+instantiation - instance - object - copy 
+
+object 
+class - template
+attribute - data belonging to object
+class car:
+	no_of wheels = 0
+	mileage = 0
+	no_of_airbags = 0
+
+
+	def __init__ (self,no_of_wheels, no_of_airbags, mileage ##user input): ##constructor -- runs during every class call 
+
+		print("This is a constructor")
+		self.mileage = mileage
+		self.no_of_wheels = no_of_wheels
+		self.no_of_airbags = no_of_airbags
+		
+
+	def moveForward(self,speed): ## self  - object name 
+		print("Car is moving with a speed of ",speed)
+
+	def moveBackward(self):
+		print("car is moving back")
+
+	def __str__(self):
+		return (self.carname) -- when we use string in default it prints hashcode so to print word we need to use it
+
+##create object
+
+car1=car() ## object created - instantiation
+print (car1.no_of_wheels) ## 0
+print(car1.mileage) ## 0  self.mileage
+
+car2 = car()
+car2.mileage = 25 ## changes values
+
+car3 = car()
+car3.moveForward(100)
+
+
+##Constructor -- set of command during creating objects -- gives values 
+
+##destructor -- remove unwanted-- delete
+
+	def __del__(self):
+		print("this is destructor",id(self)--memory address) ##-works at end after every object is completed calling
+
+
+##user input
+car4=car(4,6,17)
+print (car4.mileage,car4.no_of_wheels,car4.no_of_airbags)
+
+
+##encapsulation -- binding of variables and methods 
+
+--getters  setters 
+private variable -- only inside a class can be accessed (__) 
+	self.__no_of_wheels = no_of_wheels
+
+	## getter -- to get private values out of class
+
+	def get_no_of_wheels(self):
+		return ("NO of wheels:", self.__no_of_wheels) -- this can be used outside as we used the private only inside the class 
+
+	## setter -- to set private values out of class
+		
+	def set_no_of_wheels(self,no_of_wheels):
+		self.__no_of_wheels = no_of_wheels
+
+
+car1.set_no_of_wheels(9)
+print(car1.get_no_of_wheels())
+	
+
+##inheritance - reusability of code 
+
+class vehicle:
+	no_of_wheels = 4
+	
+ 
+
+
